@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/base.css"/>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=k3hGTr3v8pGucDGppYdObbLkwU7lGLSO"></script>
+		<style type="text/css">
+			#container {height:80%;}
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+		<button class="point" onclick="draw.drawPointMode()">绘制点</button>
+		<button class="line" onclick="draw.drawLineMode()">绘制线</button>
+		<button class="polygon" onclick="draw.drawPolygonMode()">绘制面</button>
+		<button class="circle" onclick="draw.drawCircleMode()">绘制圆</button>
+		<script src="js/bd_gis.js" type="text/javascript" charset="utf-8"></script>
+		
+		<script type="text/javascript">
+		
+			
+			function locate (str) {
+				var result=gcoder.getPoint(str);
+				//通过调用C#方法，将result再 传到C#中
+			}
+			
+			locate("武汉市洪山区珞狮路");
+		</script>
+	</body>
+</html>

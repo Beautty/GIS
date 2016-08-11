@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/base.css"/>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=k3hGTr3v8pGucDGppYdObbLkwU7lGLSO"></script>
+	</head>
+	<body>
+		<div id="container"></div>
+		
+		<script type="text/javascript">
+		// 百度地图API功能
+		var map = new BMap.Map("container");
+		var point = new BMap.Point(114.316,30.581);
+		map.centerAndZoom(point,12);
+		// 创建地址解析器实例
+		var myGeo = new BMap.Geocoder();
+		// 将地址解析结果显示在地图上,并调整地图视野
+		myGeo.getPoint("武汉市洪山区珞狮路", function(point){
+			if (point) {
+				map.centerAndZoom(point, 16);
+				map.addOverlay(new BMap.Marker(point));
+			}else{
+				alert("您选择地址没有解析到结果!");
+			}
+		}, "北京市");
+		
+		
+			map.addEventListener("click", function(e){        
+		var pt = e.point;
+		myGeo.getLocation(pt, function(rs){
+			var addComp = rs.addressComponents;
+			alert(addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+		});        
+	});
+	</script>
+	</body>
+</html>
