@@ -8,45 +8,38 @@
 		var geoCoder=new BMap.Geocoder();
 		
 		
-		
-		var drawMode=function(type){
-			return new drawMode.fn.init(type);
-		}
-		drawMode.fn=drawMode.prototype={
-			type:"",
-			init:function(type){
-				this.type=type;
-				return this;
-			},
-			addEventLisner:function(){
-				map.addEventListener("click",function(e){
-				this.draw(e,type);
-				});
-				map.addEventListener("rightclick",function(){
-					this.endDraw();
-				});
-			}
-		}
-		
-		
-	
-		var draw=function(type) {
-			map.addEventListener("click",function(e){
-				drawMode.draw(e,type);
-			});
-			map.addEventListener("rightclick",function(){
-				drawMode.endDraw();
-			});
-		}
-		
-		
 		var drawMode={
 			type:"",
 			polylinePoints:[],
 			polygonPoints:[],
-			lineStyleOpt:{strokeColor:"blue", strokeWeight:2},
-			draw:function(e,type){
-				switch (type) {
+			polygon:new Object(),
+			point:null,
+			StyleOpt:{
+		        strokeColor:"red",    //边线颜色。
+		        fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+		        strokeWeight: 3,       //边线的宽度，以像素为单位。
+		        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+		        fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+		        strokeStyle: 'solid' //边线的样式，solid或dashed。
+		    },
+			init:function(type){
+				var self=this;
+				this.type=type;
+				map.addEventListener("click",self.clickCallbacks);
+				map.addEventListener("rightclick",self.rclickCallbacks);
+				map.addEventListener("mousemove",self.moveCallbacks);
+			},
+			clickCallbacks:function(e){
+				drawMode.draw(e);
+			},
+			rclickCallbacks:function(){
+				drawMode.endDraw();
+			},
+			moveCallbacks:function(e){
+				drawMode.move(e);
+			},
+			draw:function(e){
+				switch (this.type) {
 					case "Point":
 						this.drawPoint(e);
 						break;
@@ -54,15 +47,26 @@
 						this.drawPolyline(e);
 						break;
 					case "Polygon":
-						//this.drawPolygon(e);
+						this.drawPolygon(e);
+						break;
+					case "Circle":
+						this.drawPolygon(e);
 						break;
 					default: 
 						break;
 				}
-				this.type=type;
-				
-				/*//注册右键点击事件结束绘制，是否可以进行优化？每一次绘制都会注册事件
-				map.addEventListener("rightclick",this.endDraw);*/
+			},
+			move:function(e){
+				switch (this.type){
+					case "Polygon":
+						this.formPolygon(e);
+						break;
+					case "Circle":
+						this.formCircle(e);
+						break;
+					default:
+						break;
+				}
 			},
 			drawPoint:function(e){
 				var point=e.point;
@@ -72,7 +76,7 @@
 			drawPolyline:function(e){
 				var len=this.polylinePoints.length;
 				if(len>0){
-					var line=new BMap.Polyline([this.polylinePoints[len-1],e.point],this.lineStyleOpt);
+					var line=new BMap.Polyline([this.polylinePoints[len-1],e.point],this.StyleOpt);
 					map.addOverlay(line);
 					this.polylinePoints.push(e.point);
 				}else{
@@ -80,18 +84,13 @@
 				}
 			},
 			drawPolygon:function(e){
-				var len=this.polygonPoints.length;
-				if(len>0){
-					if(this.polygonPoints[len-1].lat==e.point.lat&&this.polygonPoints[len-1].lng==e.point.lng){
-						
-					}else{
-						var line=new BMap.Polyline([this.polygonPoints[len-1],e.point],this.lineStyleOpt);
-						map.addOverlay(line);
-						this.polygonPoints.push(e.point);
-					}
+				this.polygonPoints.push(e.point);
+				if(this.polygonPoints.lenght<2){
+					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
 				}else{
-					this.polygonPoints.push(e.point);
+					this.polygon.setPath(this.polygonPoints);
 				}
+				map.addOverlay(this.polygon);
 			},
 			endDraw:function(){
 				switch (this.type) {
@@ -104,6 +103,18 @@
 					default: 
 						break;
 				}
+			},
+			formPolygon:function(e){
+				if(this.point==null){
+						this.point=e.point;
+						this.polygonPoints.push(this.point);
+					}else{
+						this.polygonPoints[this.polygonPoints-1]=this.point;
+					}
+					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
+					map.addOverlay(this.polygon);
+			},
+			formCircle:function(e){
 			}
 			
 		}
@@ -132,21 +143,9 @@
 		
 		
 		
-		window.draw=draw;
+		
+		window.drawMode=drawMode;
 		window.gcoder=gcoder;
 		
-		
-	/*var showCoords=function(str){
-			var point=new BMap.Point(0,0);
-			map.addEventListener("mousemove",function(e){
-				point=e.point;
-			})
-			return point.latitude+","+point.longitude;
-		}
-		
-		var str="";
-		console.log(showCoords(str));
-		*/
-	
 })(window)
 
