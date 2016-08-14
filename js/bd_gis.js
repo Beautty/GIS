@@ -9,9 +9,6 @@
 		
 		
 		var drawMode={
-			
-			count:0,
-			
 			type:"",
 			polylinePoints:[],
 			polygonPoints:[],
@@ -87,14 +84,10 @@
 				}
 			},
 			drawPolygon:function(e){
-				this.count++;
-				console.log(this.count);
-				console.log(this.polygonPoints);
 				this.polygonPoints.push(e.point);
 				if(this.polygonPoints.length<=2){
 					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
 					map.addOverlay(this.polygon);
-					console.log("执行了吗？");
 				}else{
 					this.polygon.setPath(this.polygonPoints);
 					this.point=null;
