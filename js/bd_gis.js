@@ -9,6 +9,9 @@
 		
 		
 		var drawMode={
+			
+			count:0,
+			
 			type:"",
 			polylinePoints:[],
 			polygonPoints:[],
@@ -84,13 +87,18 @@
 				}
 			},
 			drawPolygon:function(e){
+				this.count++;
+				console.log(this.count);
+				console.log(this.polygonPoints);
 				this.polygonPoints.push(e.point);
-				if(this.polygonPoints.lenght<2){
+				if(this.polygonPoints.length<=2){
 					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
+					map.addOverlay(this.polygon);
+					console.log("执行了吗？");
 				}else{
 					this.polygon.setPath(this.polygonPoints);
+					this.point=null;
 				}
-				map.addOverlay(this.polygon);
 			},
 			endDraw:function(){
 				switch (this.type) {
@@ -105,14 +113,23 @@
 				}
 			},
 			formPolygon:function(e){
-				if(this.point==null){
+				
+				if(this.polygonPoints.length>=2){
+					
+					if(this.point==null){
+						console.log("move:"+e.point.lat+","+e.point.lng);
 						this.point=e.point;
 						this.polygonPoints.push(this.point);
+						console.log(this.point);
 					}else{
-						this.polygonPoints[this.polygonPoints-1]=this.point;
+						console.log("else move:"+e.point.lat+","+e.point.lng);
+						this.polygonPoints[this.polygonPoints.length-1]=e.point;
+						console.log(this.polygonPoints);
 					}
-					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
-					map.addOverlay(this.polygon);
+					this.polygon.setPath(this.polygonPoints);
+					/*this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
+					map.addOverlay(this.polygon);*/
+				}
 			},
 			formCircle:function(e){
 			}
