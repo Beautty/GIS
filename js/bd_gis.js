@@ -12,9 +12,10 @@
 			type:"",
 			polylinePoints:[],
 			polygonPoints:[],
-			polygon:new Object(),
+			polygon:null,
+			circle:null,
 			point:null,
-			StyleOpt:{
+			styleOpt:{
 		        strokeColor:"red",    //边线颜色。
 		        fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
 		        strokeWeight: 3,       //边线的宽度，以像素为单位。
@@ -50,7 +51,8 @@
 						this.drawPolygon(e);
 						break;
 					case "Circle":
-						this.drawPolygon(e);
+					
+						this.drawCircle(e);
 						break;
 					default: 
 						break;
@@ -69,14 +71,13 @@
 				}
 			},
 			drawPoint:function(e){
-				var point=e.point;
-				var marker=new BMap.Marker(point);
+				var marker=new BMap.Marker(e.point);
 				map.addOverlay(marker);
 			},
 			drawPolyline:function(e){
 				var len=this.polylinePoints.length;
 				if(len>0){
-					var line=new BMap.Polyline([this.polylinePoints[len-1],e.point],this.StyleOpt);
+					var line=new BMap.Polyline([this.polylinePoints[len-1],e.point],this.styleOpt);
 					map.addOverlay(line);
 					this.polylinePoints.push(e.point);
 				}else{
@@ -86,11 +87,22 @@
 			drawPolygon:function(e){
 				this.polygonPoints.push(e.point);
 				if(this.polygonPoints.length<=2){
-					this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
+					this.polygon=new BMap.Polygon(this.polygonPoints,this.styleOpt);
 					map.addOverlay(this.polygon);
 				}else{
 					this.polygon.setPath(this.polygonPoints);
 					this.point=null;
+				}
+			},
+			drawCircle:function(e){
+				if(this.circle){
+					var point=this.circle.getCenter();
+					var dis=map.getDistance(point,e.point);
+					this.circle.setRadius(dis);
+					this.circle=null;
+				}else{
+					this.circle=new BMap.Circle(e.point,0,this.styleOpt);
+					map.addOverlay(this.circle);
 				}
 			},
 			endDraw:function(){
@@ -99,6 +111,7 @@
 						this.polylinePoints.splice(0,this.polylinePoints.length);
 						break;
 					case "Polygon":
+					//保存points数组内容，并清空points数组，以便下一次绘制
 						this.polygonPoints.splice(0,this.polygonPoints.length);
 						break;
 					default: 
@@ -110,21 +123,21 @@
 				if(this.polygonPoints.length>=2){
 					
 					if(this.point==null){
-						console.log("move:"+e.point.lat+","+e.point.lng);
 						this.point=e.point;
 						this.polygonPoints.push(this.point);
-						console.log(this.point);
 					}else{
-						console.log("else move:"+e.point.lat+","+e.point.lng);
 						this.polygonPoints[this.polygonPoints.length-1]=e.point;
-						console.log(this.polygonPoints);
 					}
 					this.polygon.setPath(this.polygonPoints);
-					/*this.polygon=new BMap.Polygon(this.polygonPoints,this.StyleOpt);
-					map.addOverlay(this.polygon);*/
+					
 				}
 			},
 			formCircle:function(e){
+				if(this.circle){
+					var point=this.circle.getCenter();
+					var dis=map.getDistance(point,e.point);
+					this.circle.setRadius(dis);
+				}
 			}
 			
 		}
